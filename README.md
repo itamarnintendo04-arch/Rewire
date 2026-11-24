@@ -86,6 +86,20 @@ Extensions
 - **Unlocking from the block screen.** An extension can't open its host app, so it posts a
   notification. Tapping it opens the unlock flow.
 
+## Troubleshooting: "it doesn't ask for Screen Time access"
+
+iOS shows the Screen Time permission dialog only when the installed app is signed with the
+**`com.apple.developer.family-controls`** entitlement. If the entitlement is missing, iOS rejects the
+request instantly and shows no dialog. The app now detects this and tells you why on the
+permission screen.
+
+- **AltStore, SideStore, or Sideloadly with a free Apple ID:** a free account can't grant this
+  entitlement, so blocking will never work this way.
+- **Paid developer account:** enable the *Family Controls* capability on the App ID of the app and of
+  each extension, then re-sign. Building from Xcode with your team selected does this for you.
+- **Other causes:** a child account in Family Sharing, Screen Time restricted by a parent or MDM
+  profile, or no device passcode set. The permission screen shows the exact reason.
+
 ## Apple limitations to know
 - Usage data is only available inside the Report extension and cannot be sent out of it.
 - The Monitor extension has a memory limit of about 6 MB, so it is kept lightweight.

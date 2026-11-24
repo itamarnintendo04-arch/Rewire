@@ -43,6 +43,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var focusMinutesTotal = 0
     @Published var showUnlockFlow = false
     @Published var errorMessage: String?
+    /// Detailed reason the last Screen Time request failed (shown on the permission screen).
+    @Published var authFailureReason: String?
 
     init() {
         hasOnboarded = store.hasOnboarded
@@ -106,16 +108,27 @@ final class AppModel: ObservableObject {
     // MARK: - Authorization
 
     func requestAuthorization() async -> Bool {
-        do {
-            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-            authStatus = AuthorizationCenter.shared.authorizationStatus
-            _ = try? await UNUserNotificationCenter.current()
-                .requestAuthorization(options: [.alert, .sound, .badge])
-            return isAuthorized
-        } catch {
-            errorMessage = "Couldn't connect to Screen Time: \(error.localizedDescription)"
+        authFailureReason = nil
+        if ScreenTimeDiagnostics.profileHasFamilyControls == false {
+            // iOS would reject the request without showing any dialog.
+            authFailureReason = ScreenTimeDiagnostics.missingEntitlementMessage
             return false
         }
+        do {
+            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+        } catch {
+            print("Screen Time authorization error: \(error)")
+            authFailureReason = ScreenTimeDiagnostics.message(for: error)
+        }
+        authStatus = AuthorizationCenter.shared.authorizationStatus
+        if isAuthorized {
+            authFailureReason = nil
+            _ = try? await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge])
+        } else if authFailureReason == nil {
+            authFailureReason = "Screen Time access wasn't granted. Tap the button and choose \"Continue\" in Apple's dialog."
+        }
+        return isAuthorized
     }
 
     // MARK: - Onboarding

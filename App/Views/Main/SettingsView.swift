@@ -83,6 +83,10 @@ struct SettingsView: View {
                         if !model.isAuthorized {
                             Button("Reconnect") { Task { _ = await model.requestAuthorization() } }
                                 .buttonStyle(SecondaryButtonStyle())
+                            if let reason = model.authFailureReason {
+                                Text(reason).font(.footnote).foregroundStyle(Theme.warning)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                         Divider().overlay(Theme.stroke)
                         Button("Retake the quiz") { confirmReset = true }

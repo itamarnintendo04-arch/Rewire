@@ -7,7 +7,6 @@ struct PermissionView: View {
     @EnvironmentObject var model: AppModel
     var onNext: () -> Void
     @State private var requesting = false
-    @State private var denied = false
 
     var body: some View {
         OnboardingPage {
@@ -31,10 +30,23 @@ struct PermissionView: View {
                     }
                 }
 
-                if denied {
-                    Text("Permission was denied. You can allow it in Settings → Screen Time, or try again.")
-                        .font(.footnote).foregroundStyle(Theme.warning)
-                        .multilineTextAlignment(.center)
+                if let reason = model.authFailureReason {
+                    Card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Screen Time couldn't be connected", systemImage: "exclamationmark.triangle.fill")
+                                .font(.headline).foregroundStyle(Theme.warning)
+                            Text(reason)
+                                .font(.subheadline).foregroundStyle(.white.opacity(0.85))
+                                .fixedSize(horizontal: false, vertical: true)
+                            Button("Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.accent)
+                        }
+                    }
                 }
             }
         } footer: {
@@ -44,12 +56,13 @@ struct PermissionView: View {
                         requesting = true
                         let ok = await model.requestAuthorization()
                         requesting = false
-                        if ok { onNext() } else { denied = true }
+                        if ok { onNext() }
                     }
                 } label: {
                     HStack {
                         if requesting { ProgressView().tint(.white) }
-                        Text(model.isAuthorized ? "Connected ✓ Continue" : "Connect Screen Time")
+                        Text(model.isAuthorized ? "Connected ✓ Continue"
+                     : (model.authFailureReason == nil ? "Connect Screen Time" : "Try again"))
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
@@ -60,7 +73,6 @@ struct PermissionView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .onAppear { if model.isAuthorized { denied = false } }
     }
 
     private func privacyRow(_ icon: String, _ text: String) -> some View {

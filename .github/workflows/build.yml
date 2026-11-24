@@ -1,0 +1,85 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Set version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i '' "s/MARKETING_VERSION: \".*\"/MARKETING_VERSION: \"$VERSION\"/" project.yml
+          sed -i '' "s/CURRENT_PROJECT_VERSION: \".*\"/CURRENT_PROJECT_VERSION: \"$GITHUB_RUN_NUMBER\"/" project.yml
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build (unsigned, device)
+        run: |
+          set -o pipefail
+          xcodebuild -version
+          xcodebuild \
+            -project Rewire.xcodeproj \
+            -target Rewire \
+            -configuration Release \
+            -sdk iphoneos \
+            SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build 2>&1 | tee build.log | grep -E "error:|warning: .*Swift|\*\* BUILD" || true
+          grep -q "\*\* BUILD SUCCEEDED \*\*" build.log || { echo "---- last 150 lines ----"; tail -150 build.log; exit 1; }
+
+      - name: Embed entitlements (ad-hoc sign)
+        run: |
+          APP="build/Release-iphoneos/Rewire.app"
+          for EXT in "$APP"/PlugIns/*.appex; do
+            NAME=$(basename "$EXT" .appex)
+            ENT=$(find Extensions -name "$NAME.entitlements" | head -1)
+            echo "Signing $NAME with $ENT"
+            codesign --force --sign - --entitlements "$ENT" "$EXT"
+          done
+          codesign --force --sign - --entitlements App/Rewire.entitlements "$APP"
+          codesign -d --entitlements :- "$APP"
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/Release-iphoneos/Rewire.app Payload/
+          zip -qry Rewire.ipa Payload
+          ls -lh Rewire.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Rewire-ipa
+          path: Rewire.ipa
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Rewire.ipa
+          generate_release_notes: true
+          body: |
+            ## Rewire ${{ github.ref_name }}
+
+            Unsigned iOS build (`Rewire.ipa`). Install it by re-signing with your own Apple ID / developer
+            certificate – e.g. Sideloadly, AltStore or Xcode. See the README for details.
+
+            Screen Time blocking needs the **Family Controls** capability on your Apple Developer account
+            and a real iPhone running iOS 16+.

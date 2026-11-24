@@ -39,33 +39,33 @@ struct UnlockFlowView: View {
         VStack(spacing: 24) {
             Spacer()
             Text("🤔").font(.system(size: 80))
-            Text("את/ה באמת צריך/ה את זה עכשיו?")
+            Text("Do you really need this right now?")
                 .font(.system(size: 28, weight: .heavy, design: .rounded))
                 .multilineTextAlignment(.center).foregroundStyle(.white)
             Text(model.canUnlock
-                 ? "נשארו לך \(model.unlocksLeft) שחרורים היום."
+                 ? "You have \(model.unlocksLeft) unlocks left today."
                  : unavailableReason)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.white.opacity(0.7))
             Spacer()
             if model.canUnlock {
-                Button("כן, אני צריך/ה כמה דקות") {
+                Button("Yes, I need a few minutes") {
                     remaining = model.unlockWaitSeconds
                     withAnimation { phase = .breathe }
                     withAnimation(.easeInOut(duration: 4)) { inhale = true }
                 }
                 .buttonStyle(SecondaryButtonStyle())
             }
-            Button("לא, אני מוותר/ת 💪") { dismiss() }
+            Button("No, I'll skip it 💪") { dismiss() }
                 .buttonStyle(PrimaryButtonStyle())
         }
     }
 
     private var unavailableReason: String {
-        if model.strictMode { return "מצב קשוח פעיל – אין שחרורים. את/ה חזק/ה יותר מהדחף." }
-        if model.activeReason == .session { return "סשן פוקוס פעיל – אי אפשר לשחרר באמצע." }
-        if model.activeReason == nil { return "שום דבר לא חסום כרגע." }
-        return "ניצלת את כל השחרורים להיום. נתראה מחר!"
+        if model.strictMode { return "Strict mode is on – no unlocks. You're stronger than the urge." }
+        if model.activeReason == .session { return "A focus session is running – it can't be unlocked midway." }
+        if model.activeReason == nil { return "Nothing is blocked right now." }
+        return "You've used all your unlocks for today. See you tomorrow!"
     }
 
     private var breathe: some View {
@@ -83,13 +83,14 @@ struct UnlockFlowView: View {
                     .font(.system(size: 48, weight: .heavy, design: .rounded).monospacedDigit())
                     .foregroundStyle(.white)
             }
-            Text(inhale ? "שאיפה…" : "נשיפה…")
+            Text(inhale ? "Breathe in…" : "Breathe out…")
                 .font(.system(size: 26, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-            Text("רגע של עצירה לפני שהדחף מחליט בשבילך")
+            Text("A moment to pause before the urge decides for you")
+                .multilineTextAlignment(.center)
                 .foregroundStyle(.white.opacity(0.6))
             Spacer()
-            Button("התחרטתי, לא צריך") { dismiss() }
+            Button("Changed my mind") { dismiss() }
                 .buttonStyle(SecondaryButtonStyle())
         }
     }
@@ -97,19 +98,19 @@ struct UnlockFlowView: View {
     private var choose: some View {
         VStack(spacing: 20) {
             Spacer()
-            Text("לכמה זמן?")
+            Text("For how long?")
                 .font(.system(size: 30, weight: .heavy, design: .rounded)).foregroundStyle(.white)
-            Text("אחרי הזמן הזה הכל ננעל שוב אוטומטית.")
+            Text("After that, everything locks again automatically.")
                 .foregroundStyle(.white.opacity(0.6))
             ForEach([5, 10, 15], id: \.self) { m in
-                Button("\(m) דקות") {
+                Button("\(m) minutes") {
                     model.unlock(minutes: m)
                     dismiss()
                 }
                 .buttonStyle(SecondaryButtonStyle())
             }
             Spacer()
-            Button("בעצם, אני מוותר/ת 💪") { dismiss() }
+            Button("Actually, I'll skip it 💪") { dismiss() }
                 .buttonStyle(PrimaryButtonStyle())
         }
     }

@@ -31,8 +31,8 @@ class ShieldActionExtension: ShieldActionDelegate {
         case .secondaryButtonPressed:
             let store = SharedStore.shared
             store.unlockRequestedAt = Date()
-            Notifier.send(title: "🔓 בקשת שחרור",
-                          body: "לחצ/י כאן כדי לפתוח את Rewire ולבקש כמה דקות.",
+            Notifier.send(title: "🔓 Unlock request",
+                          body: "Tap here to open Rewire and ask for a few minutes.",
                           id: "unlock.request",
                           category: Notifier.unlockCategory)
             // .defer re-renders the shield so it shows "tap the notification".

@@ -15,9 +15,9 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.4), value: model.hasOnboarded)
-        .alert("שגיאה", isPresented: Binding(get: { model.errorMessage != nil },
+        .alert("Error", isPresented: Binding(get: { model.errorMessage != nil },
                                               set: { if !$0 { model.errorMessage = nil } })) {
-            Button("אישור", role: .cancel) {}
+            Button("OK", role: .cancel) {}
         } message: {
             Text(model.errorMessage ?? "")
         }

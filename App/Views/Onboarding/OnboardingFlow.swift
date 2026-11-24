@@ -2,7 +2,7 @@ import SwiftUI
 
 enum OnboardingStep: Hashable {
     case welcome
-    case name
+    case profile
     case quiz(Int)
     case calculating
     case results
@@ -29,8 +29,8 @@ struct OnboardingFlow: View {
             }
             content
                 .id(step)
-                .transition(.asymmetric(insertion: .move(edge: .leading).combined(with: .opacity),
-                                        removal: .move(edge: .trailing).combined(with: .opacity)))
+                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
+                                        removal: .move(edge: .leading).combined(with: .opacity)))
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.85), value: step)
     }
@@ -43,7 +43,7 @@ struct OnboardingFlow: View {
     }
 
     private var progress: Double {
-        let order: [OnboardingStep] = [.name] + (0..<quizCount).map { .quiz($0) } +
+        let order: [OnboardingStep] = [.profile] + (0..<quizCount).map { .quiz($0) } +
             [.results, .projection, .howItWorks, .permission, .selectApps, .dailyLimit, .schedule, .commitment]
         guard let i = order.firstIndex(of: step) else { return 0 }
         return Double(i + 1) / Double(order.count)
@@ -54,7 +54,7 @@ struct OnboardingFlow: View {
             Button {
                 back()
             } label: {
-                Image(systemName: "chevron.forward")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.white.opacity(history.isEmpty ? 0.2 : 0.8))
                     .frame(width: 36, height: 36)
@@ -67,9 +67,9 @@ struct OnboardingFlow: View {
     @ViewBuilder private var content: some View {
         switch step {
         case .welcome:
-            WelcomeView { go(.name) }
-        case .name:
-            NameView { go(.quiz(0)) }
+            WelcomeView { go(.profile) }
+        case .profile:
+            ProfileView { go(.quiz(0)) }
         case .quiz(let i):
             let question = QuizBank.questions[i]
             let next: () -> Void = {

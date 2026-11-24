@@ -22,15 +22,15 @@ struct WelcomeView: View {
                 Text("Rewire")
                     .font(.system(size: 48, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
-                Text("הטלפון שלך מתוכנת להתמכר.\nבוא/י נתכנת את המוח שלך מחדש.")
+                Text("Your phone is engineered to be addictive.\nLet's rewire your brain.")
                     .font(.system(size: 19, weight: .medium))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white.opacity(0.7))
             }
             Spacer()
             VStack(spacing: 12) {
-                Button("בוא/י נתחיל", action: onNext).buttonStyle(PrimaryButtonStyle())
-                Text("שאלון קצר של דקה · בלי הרשמה")
+                Button("Get started", action: onNext).buttonStyle(PrimaryButtonStyle())
+                Text("1-minute quiz · no sign-up")
                     .font(.footnote).foregroundStyle(.white.opacity(0.45))
             }
             .padding(.horizontal, 24)
@@ -39,7 +39,8 @@ struct WelcomeView: View {
     }
 }
 
-struct NameView: View {
+/// Asks for the user's name and exact age.
+struct ProfileView: View {
     @EnvironmentObject var model: AppModel
     var onNext: () -> Void
     @FocusState private var focused: Bool
@@ -47,19 +48,45 @@ struct NameView: View {
     var body: some View {
         OnboardingPage {
             VStack(alignment: .leading, spacing: 28) {
-                StepHeader(title: "קודם כל, איך קוראים לך?",
-                           subtitle: "כדי שנוכל לדבר איתך כמו חברים 🤝")
-                TextField("השם שלך", text: $model.userName)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .padding(20)
+                StepHeader(title: "First, tell us about you",
+                           subtitle: "We use your age to calculate how much of your life goes to screens.")
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Name").font(.subheadline.weight(.bold)).foregroundStyle(.white.opacity(0.6))
+                    TextField("Your name", text: $model.userName)
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .textContentType(.givenName)
+                        .padding(18)
+                        .background(RoundedRectangle(cornerRadius: 18).fill(Theme.card))
+                        .overlay(RoundedRectangle(cornerRadius: 18)
+                            .stroke(focused ? Theme.accent : Theme.stroke, lineWidth: 2))
+                        .focused($focused)
+                        .submitLabel(.done)
+                        .onSubmit { focused = false }
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Age").font(.subheadline.weight(.bold)).foregroundStyle(.white.opacity(0.6))
+                    HStack {
+                        Text("\(model.userAge)")
+                            .font(.system(size: 44, weight: .black, design: .rounded).monospacedDigit())
+                            .foregroundStyle(Theme.gradient)
+                        Text("years old").foregroundStyle(.white.opacity(0.6))
+                        Spacer()
+                        Picker("Age", selection: $model.userAge) {
+                            ForEach(8...99, id: \.self) { Text("\($0)").tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 100, height: 120)
+                        .clipped()
+                    }
+                    .padding(.horizontal, 18)
                     .background(RoundedRectangle(cornerRadius: 18).fill(Theme.card))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(focused ? Theme.accent : Theme.stroke, lineWidth: 2))
-                    .focused($focused)
-                    .submitLabel(.next)
-                    .onSubmit { if canContinue { onNext() } }
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.stroke, lineWidth: 1))
+                }
             }
         } footer: {
-            Button("המשך", action: onNext)
+            Button("Continue", action: onNext)
                 .buttonStyle(PrimaryButtonStyle(enabled: canContinue))
                 .disabled(!canContinue)
         }
@@ -101,7 +128,7 @@ struct QuestionView: View {
         } footer: {
             if question.multiSelect {
                 let ok = model.quiz.isAnswered(question)
-                Button("המשך", action: onNext)
+                Button("Continue", action: onNext)
                     .buttonStyle(PrimaryButtonStyle(enabled: ok))
                     .disabled(!ok)
             }
@@ -115,10 +142,10 @@ struct CalculatingView: View {
     @State private var messageIndex = 0
 
     private let messages = [
-        "מנתח את הרגלי הגלילה שלך…",
-        "משווה לאלפי משתמשים…",
-        "מחשב את ציון ה-Brain Rot…",
-        "בונה לך תוכנית אישית…",
+        "Analyzing your scrolling habits…",
+        "Comparing with thousands of users…",
+        "Calculating your Brain Rot score…",
+        "Building your personal plan…",
     ]
     private let timer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
 

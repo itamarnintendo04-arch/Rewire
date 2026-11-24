@@ -5,82 +5,93 @@ struct SettingsView: View {
     @EnvironmentObject var model: AppModel
     @State private var showPicker = false
     @State private var confirmReset = false
+    @State private var applyTask: Task<Void, Never>?
 
     var body: some View {
-        Screen(title: "הגדרות") {
-            section("אפליקציות חסומות") {
-                SelectionSummary(selection: model.selection) { showPicker = true }
-                    .disabled(model.strictMode && model.activeReason != nil)
-                if model.strictMode && model.activeReason != nil {
-                    Text("במצב קשוח אי אפשר לשנות את הרשימה בזמן חסימה.")
-                        .font(.footnote).foregroundStyle(Theme.warning)
+        Screen(title: "Settings") {
+            section("Profile") {
+                Card {
+                    VStack(alignment: .leading, spacing: 14) {
+                        TextField("Your name", text: $model.userName)
+                            .foregroundStyle(.white)
+                        Divider().overlay(Theme.stroke)
+                        Stepper(value: $model.userAge, in: 8...99) {
+                            row("Age", "\(model.userAge)")
+                        }
+                    }
                 }
             }
 
-            section("יעד זמן מסך יומי") {
+            section("Daily screen time goal") {
                 Card {
                     VStack(alignment: .leading, spacing: 10) {
                         MinutesDial(minutes: $model.goalMinutes, range: 15...600,
                                     color: AnyShapeStyle(Theme.neon))
                         if let r = model.quizResult {
-                            Text("התחלת עם \(formatMinutes(r.currentMinutes)) ביום.")
+                            Text("You started at \(formatMinutes(r.currentMinutes)) a day.")
                                 .font(.footnote).foregroundStyle(.white.opacity(0.55))
                         }
                     }
                 }
             }
 
-            section("מגבלה יומית לאפליקציות חסומות") {
+            section("Blocked apps") {
+                SelectionSummary(selection: model.selection) { showPicker = true }
+                    .disabled(model.strictMode && model.activeReason != nil)
+                if model.strictMode && model.activeReason != nil {
+                    Text("In strict mode you can't change the list while blocking is active.")
+                        .font(.footnote).foregroundStyle(Theme.warning)
+                }
+            }
+
+            section("Daily limit for blocked apps") {
                 Card { DailyLimitEditor() }
                     .disabled(model.strictMode && model.activeReason == .limit)
             }
 
-            section("זמני חסימה") {
+            section("Scheduled block times") {
                 Card { ScheduleEditor() }
             }
 
-            section("שחרורים") {
+            section("Unlocks") {
                 Card {
                     VStack(spacing: 16) {
                         Toggle(isOn: $model.strictMode) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("🔒 מצב קשוח").font(.headline).foregroundStyle(.white)
-                                Text("בלי שחרורים ובלי סיום סשן מוקדם").font(.caption).foregroundStyle(.white.opacity(0.6))
+                                Text("🔒 Strict mode").font(.headline).foregroundStyle(.white)
+                                Text("No unlocks and no ending sessions early").font(.caption).foregroundStyle(.white.opacity(0.6))
                             }
                         }
                         .tint(Theme.danger)
 
                         if !model.strictMode {
                             Stepper(value: $model.maxUnlocksPerDay, in: 0...10) {
-                                row("שחרורים ביום", "\(model.maxUnlocksPerDay)")
+                                row("Unlocks per day", "\(model.maxUnlocksPerDay)")
                             }
                             Stepper(value: $model.unlockWaitSeconds, in: 5...120, step: 5) {
-                                row("זמן המתנה לפני שחרור", "\(model.unlockWaitSeconds) שנ׳")
+                                row("Wait before unlocking", "\(model.unlockWaitSeconds)s")
                             }
                         }
                     }
                 }
             }
 
-            section("חשבון") {
+            section("Account") {
                 Card {
                     VStack(alignment: .leading, spacing: 14) {
-                        row("זמן מסך", model.isAuthorized ? "מחובר ✓" : "לא מחובר")
+                        row("Screen Time", model.isAuthorized ? "Connected ✓" : "Not connected")
                         if !model.isAuthorized {
-                            Button("חבר/י מחדש") { Task { _ = await model.requestAuthorization() } }
+                            Button("Reconnect") { Task { _ = await model.requestAuthorization() } }
                                 .buttonStyle(SecondaryButtonStyle())
                         }
                         Divider().overlay(Theme.stroke)
-                        TextField("השם שלך", text: $model.userName)
-                            .foregroundStyle(.white)
-                        Divider().overlay(Theme.stroke)
-                        Button("לעשות את השאלון מחדש") { confirmReset = true }
+                        Button("Retake the quiz") { confirmReset = true }
                             .foregroundStyle(Theme.accent)
                     }
                 }
             }
 
-            Text("Rewire 1.0 · הנתונים נשארים במכשיר")
+            Text("Rewire \(appVersion) · your data stays on your device")
                 .font(.caption).foregroundStyle(.white.opacity(0.35))
                 .padding(.top, 8)
         }
@@ -88,13 +99,15 @@ struct SettingsView: View {
         .onChange(of: model.dailyLimitMinutes) { _ in debounceApply() }
         .onChange(of: model.scheduleStart) { _ in debounceApply() }
         .onChange(of: model.scheduleEnd) { _ in debounceApply() }
-        .confirmationDialog("לעשות את השאלון מחדש?", isPresented: $confirmReset, titleVisibility: .visible) {
-            Button("כן, מההתחלה") { model.resetOnboarding() }
-            Button("ביטול", role: .cancel) {}
+        .confirmationDialog("Retake the quiz?", isPresented: $confirmReset, titleVisibility: .visible) {
+            Button("Yes, start over") { model.resetOnboarding() }
+            Button("Cancel", role: .cancel) {}
         }
     }
 
-    @State private var applyTask: Task<Void, Never>?
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
 
     private func debounceApply() {
         applyTask?.cancel()

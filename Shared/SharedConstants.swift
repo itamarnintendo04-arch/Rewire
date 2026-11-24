@@ -37,9 +37,9 @@ enum BlockReason: String, Codable {
 
     var title: String {
         switch self {
-        case .session: return "סשן פוקוס פעיל"
-        case .limit: return "הגעת למגבלה היומית"
-        case .schedule: return "זמן חסימה מתוזמן"
+        case .session: return "Focus session in progress"
+        case .limit: return "Daily limit reached"
+        case .schedule: return "Scheduled block time"
         }
     }
 

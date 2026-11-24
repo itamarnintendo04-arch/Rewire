@@ -108,7 +108,7 @@ struct ScoreRing: View {
                     .font(.system(size: size * 0.28, weight: .heavy, design: .rounded))
                     .foregroundStyle(Theme.scoreColor(score))
                     .contentTransition(.numericText())
-                Text("מתוך 100").font(.caption).foregroundStyle(.secondary)
+                Text("out of 100").font(.caption).foregroundStyle(.secondary)
             }
         }
         .frame(width: size, height: size)

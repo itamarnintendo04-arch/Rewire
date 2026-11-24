@@ -12,8 +12,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         switch activity {
         case .schedule:
             if ShieldController.reconcile(force: .schedule) == .schedule {
-                Notifier.send(title: "🌙 זמן החסימה התחיל",
-                              body: "האפליקציות שבחרת חסומות עכשיו. זמן לנוח מהמסך.",
+                Notifier.send(title: "🌙 Block time started",
+                              body: "Your chosen apps are blocked now. Time to rest from the screen.",
                               id: "schedule.start")
             }
         case .daily:
@@ -31,8 +31,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         switch activity {
         case .schedule:
             ShieldController.reconcile(ignore: [.schedule])
-            Notifier.send(title: "☀️ זמן החסימה הסתיים",
-                          body: "האפליקציות פתוחות שוב. תשתמש/י בהן בחוכמה.",
+            Notifier.send(title: "☀️ Block time ended",
+                          body: "Your apps are open again. Use them wisely.",
                           id: "schedule.end")
 
         case .session:
@@ -42,15 +42,15 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             store.sessionEnd = nil
             store.sessionStart = nil
             ShieldController.reconcile(ignore: [.session])
-            Notifier.send(title: "🎉 סשן הפוקוס הסתיים",
-                          body: "כל הכבוד! החזקת מעמד עד הסוף.",
+            Notifier.send(title: "🎉 Focus session complete",
+                          body: "Well done! You made it to the end.",
                           id: "session.end")
 
         case .unlock:
             store.unlockUntil = nil
             if ShieldController.reconcile() != nil {
-                Notifier.send(title: "⏳ ההפסקה נגמרה",
-                              body: "האפליקציות חסומות שוב. חזרה לחיים האמיתיים.",
+                Notifier.send(title: "⏳ Break is over",
+                              body: "Your apps are blocked again. Back to real life.",
                               id: "unlock.end")
             }
 
@@ -67,13 +67,13 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             store.limitReachedDay = DayKey.today
             store.markFailed()
             ShieldController.reconcile()
-            Notifier.send(title: "⏰ הגעת למגבלה היומית",
-                          body: "ניצלת את כל \(store.dailyLimitMinutes) הדקות של היום. נתראה מחר!",
+            Notifier.send(title: "⏰ Daily limit reached",
+                          body: "You've used all \(store.dailyLimitMinutes) minutes for today. See you tomorrow!",
                           id: "limit.reached")
 
         case .limitWarning:
-            Notifier.send(title: "⚠️ נשארו לך 5 דקות",
-                          body: "עוד מעט האפליקציות שבחרת ייחסמו להיום.",
+            Notifier.send(title: "⚠️ 5 minutes left",
+                          body: "Your chosen apps will be blocked for today soon.",
                           id: "limit.warning")
 
         default:
@@ -84,8 +84,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     override func intervalWillStartWarning(for activity: DeviceActivityName) {
         super.intervalWillStartWarning(for: activity)
         if activity == .schedule {
-            Notifier.send(title: "🌙 עוד 10 דקות מתחיל זמן החסימה",
-                          body: "זה הזמן לסגור את מה שאת/ה עושה.",
+            Notifier.send(title: "🌙 Block time starts in 10 minutes",
+                          body: "Time to wrap up what you're doing.",
                           id: "schedule.warning")
         }
     }

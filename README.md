@@ -1,74 +1,92 @@
-# Rewire – אפליקציית זמן מסך ל-iOS
+# Rewire – Screen Time control for iOS
 
-אפליקציה מלאה ב-SwiftUI לשליטה בזמן מסך. היא בנויה על ה-Screen Time API של אפל:
-**FamilyControls**, **ManagedSettings** ו-**DeviceActivity**.
+A full SwiftUI screen-time app built on Apple's Screen Time APIs:
+**FamilyControls**, **ManagedSettings** and **DeviceActivity**.
 
-## מה יש באפליקציה
+[![Build & Release](https://github.com/itamarnintendo04-arch/rewire/actions/workflows/build.yml/badge.svg)](https://github.com/itamarnintendo04-arch/rewire/actions/workflows/build.yml)
 
-| פיצ'ר | איפה בקוד |
+## Features
+
+| Feature | Where |
 |---|---|
-| שאלון פתיחה (10 שאלות) עם ציון Brain Rot | `App/Models/Quiz.swift`, `App/Views/Onboarding/IntroViews.swift` |
-| בשאלון: כמה זמן מסך יש לך היום ומה היעד, עם סליידר ומשוב חי | `App/Views/Onboarding/ScreenTimeInputViews.swift` |
-| התקדמות מול היעד היומי בדוח של היום, ועריכת היעד בהגדרות | `Extensions/Report/ReportViews.swift`, `SettingsView` |
-| מסך "מחשב…", ציון מול ממוצע, תחזית של שנים שהולכות לטלפון | `App/Views/Onboarding/ResultViews.swift` |
-| חיבור לזמן מסך של אפל (`AuthorizationCenter`) | `PermissionView` ב-`SetupViews.swift` |
-| בחירת אפליקציות, קטגוריות ואתרים (`FamilyActivityPicker`) | `SelectAppsView`, `SelectionSummary` |
-| מגבלה יומית: חסימה אוטומטית כשנגמר הזמן, והתראה 5 דקות לפני | `ActivityScheduler.refreshDailyLimit` ← `Extensions/Monitor` |
-| חסימה מתוזמנת (לילה, לימודים, עבודה) | `ActivityScheduler.refreshSchedule` |
-| סשן פוקוס: "חסום עכשיו" עם טיימר | `FocusView` |
-| מסך חסימה מותאם, עם ציטוטים ומונה של ניסיונות פתיחה | `Extensions/ShieldConfiguration` |
-| כפתורי מסך החסימה: סגירה או בקשת שחרור | `Extensions/ShieldAction` |
-| שחרור עם חיכוך: נשימה והמתנה, מספר שחרורים מוגבל ביום, ונעילה מחדש אוטומטית | `UnlockFlowView` |
-| מצב קשוח: בלי שחרורים ובלי סיום מוקדם של סשן | `SettingsView` |
-| דוחות זמן מסך: היום, לפי אפליקציה, הרמות טלפון, גרף שבועי | `Extensions/Report` |
-| רצף ימים, שיא, דקות פוקוס | `SharedStore` |
-| התחייבות ב"החזקת אצבע" | `CommitmentView` |
+| Profile: name and exact age | `ProfileView` in `App/Views/Onboarding/IntroViews.swift` |
+| Onboarding quiz with a Brain Rot score | `App/Models/Quiz.swift`, `IntroViews.swift` |
+| Current daily screen time and goal, set with sliders and live feedback | `App/Views/Onboarding/ScreenTimeInputViews.swift` |
+| "Calculating…" screen, score vs. average, years-of-life-on-phone projection | `App/Views/Onboarding/ResultViews.swift` |
+| Connect to Apple Screen Time (`AuthorizationCenter`) | `PermissionView` in `SetupViews.swift` |
+| Pick apps, categories and websites to block (`FamilyActivityPicker`) | `SelectAppsView`, `SelectionSummary` |
+| Daily limit: auto-block when time runs out, with a warning 5 min before | `ActivityScheduler.refreshDailyLimit` → `Extensions/Monitor` |
+| Scheduled block times (night, school, work) | `ActivityScheduler.refreshSchedule` |
+| Focus sessions ("block now" with a timer) | `FocusView` |
+| Custom block screen with quotes and a blocked-attempts counter | `Extensions/ShieldConfiguration` |
+| Block screen buttons: close, or request an unlock | `Extensions/ShieldAction` |
+| Unlock with friction: breathe and wait, limited unlocks per day, auto re-lock | `UnlockFlowView` |
+| Strict mode: no unlocks, no ending sessions early | `SettingsView` |
+| Reports: today's total, per-app usage, pickups, goal progress, weekly chart | `Extensions/Report` |
+| Streaks, best streak, total focus minutes | `SharedStore` |
+| Hold-to-commit pledge | `CommitmentView` |
 
-## איך מריצים
+## Download a build
 
-> חובה **Mac עם Xcode 15 ומעלה** ו**אייפון אמיתי**. ה-Screen Time API לא עובד בסימולטור.
+Every push to `main` builds the app on GitHub Actions. Every `v*` tag publishes a
+**GitHub Release** with `Rewire.ipa`.
 
-1. מתקינים XcodeGen ומייצרים את הפרויקט:
+The `.ipa` is **unsigned**, with the entitlements embedded. To install it, re-sign it with your
+own Apple ID or developer certificate, for example with Sideloadly, AltStore or Xcode.
+Screen Time blocking needs the **Family Controls** capability on that account, and a real
+iPhone running iOS 16 or later.
+
+## Build it yourself
+
+You need a Mac with Xcode 15 or later and a real iPhone. The Screen Time APIs do not work in the
+Simulator.
+
+1. Install XcodeGen:
    ```bash
    brew install xcodegen
    ```
+2. Generate the project and open it:
    ```bash
-   cd Rewire && xcodegen generate && open Rewire.xcodeproj
+   xcodegen generate && open Rewire.xcodeproj
    ```
-2. ב-`project.yml` משנים את:
-   - `DEVELOPMENT_TEAM` ל-Team ID שלך.
-   - `com.example.rewire` ל-Bundle ID שלך (בכל 5 ה-targets).
-   - `group.com.example.rewire` ל-App Group שלך. הוא מופיע גם ב-`Shared/SharedConstants.swift`.
-3. ב-Apple Developer:
-   - יוצרים App Group ומשייכים אותו לאפליקציה ולשלוש ההרחבות (Monitor, ShieldConfiguration, ShieldAction).
-   - מפעילים את ה-capability **Family Controls** בכל ה-App IDs.
-4. מריצים על המכשיר (Development). ההרשאה `com.apple.developer.family-controls` עובדת בפיתוח בלי אישור מיוחד.
+3. In `project.yml`, replace these with your own values:
+   - `DEVELOPMENT_TEAM`: your Team ID.
+   - `com.example.rewire`: your bundle ID prefix, in all 5 targets.
+   - `group.com.example.rewire`: your App Group. It also appears in `Shared/SharedConstants.swift`
+     and `Extensions/Report/ReportViews.swift`.
+4. In the Apple Developer portal:
+   - Create the App Group and assign it to the app and all 4 extensions.
+   - Enable the **Family Controls** capability for every App ID.
+5. Run on your device. The development Family Controls entitlement works without special approval.
 
-### לפני העלאה ל-App Store
-צריך לבקש מאפל את **Family Controls (Distribution) entitlement** בטופס:
-https://developer.apple.com/contact/request/family-controls-distribution
-הבקשה מוגשת לכל Bundle ID: האפליקציה וכל אחת מ-4 ההרחבות.
+### Before shipping to the App Store
+Request the **Family Controls (Distribution)** entitlement from Apple for the app and each of the 4
+extensions: https://developer.apple.com/contact/request/family-controls-distribution
 
-## ארכיטקטורה
+## Architecture
 
 ```
 App (SwiftUI)
- ├─ AppModel ── SharedStore (App Group UserDefaults) ◄── משותף לכל ההרחבות
+ ├─ AppModel ── SharedStore (App Group UserDefaults) ◄── shared with all extensions
  ├─ ActivityScheduler ── DeviceActivityCenter.startMonitoring(...)
  └─ ShieldController ── ManagedSettingsStore("rewire")
 
 Extensions
- ├─ Monitor          ← iOS מעיר אותה: תחילת/סוף אינטרוול, הגעה לסף
- ├─ ShieldConfig     ← מצייר את מסך החסימה
- ├─ ShieldAction     ← לחיצות על כפתורי מסך החסימה
- └─ Report           ← קורא ומציג את נתוני זמן המסך (sandbox)
+ ├─ Monitor          ← woken by iOS: interval start/end, usage thresholds
+ ├─ ShieldConfig     ← draws the block screen
+ ├─ ShieldAction     ← handles taps on the block screen buttons
+ └─ Report           ← reads and renders Screen Time data (sandboxed)
 ```
 
-- **ShieldController.reconcile()** מחשב בכל פעם אם צריך לחסום ולמה: שחרור זמני, אחריו סשן, אחריו מגבלה, ואחריו תזמון. כך האפליקציה וההרחבות לא מתנגשות זו בזו.
-- **אינטרוולים קצרים מ-15 דקות.** DeviceActivity דורש לפחות 15 דקות, אז תחילת האינטרוול נקבעת בעבר, ורק `intervalDidEnd` משמש כטיימר. ראו `scheduleOneShot`.
-- **שחרור ממסך החסימה.** הרחבה לא יכולה לפתוח את האפליקציה, ולכן נשלחת התראה. לחיצה עליה פותחת את מסך השחרור.
+- **`ShieldController.reconcile()`** works out on every call whether apps should be blocked, and why.
+  The priority order is: an active unlock, then a focus session, then the daily limit, then the
+  schedule. This keeps the app and the extensions from fighting each other.
+- **Intervals shorter than 15 minutes.** DeviceActivity requires at least 15 minutes, so the interval
+  start is set in the past and only `intervalDidEnd` is used as the timer. See `scheduleOneShot`.
+- **Unlocking from the block screen.** An extension can't open its host app, so it posts a
+  notification. Tapping it opens the unlock flow.
 
-## מגבלות של אפל שכדאי להכיר
-- נתוני השימוש זמינים רק בתוך הרחבת ה-Report, ואי אפשר להוציא אותם לאפליקציה.
-- להרחבת ה-Monitor יש מגבלת זיכרון של כ-6MB, ולכן היא נשארת רזה.
-- `eventDidReachThreshold` מגיע לפעמים באיחור של דקה או שתיים. זו התנהגות של iOS.
+## Apple limitations to know
+- Usage data is only available inside the Report extension and cannot be sent out of it.
+- The Monitor extension has a memory limit of about 6 MB, so it is kept lightweight.
+- `eventDidReachThreshold` can arrive a minute or two late. This is iOS behavior.

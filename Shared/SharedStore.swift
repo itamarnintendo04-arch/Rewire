@@ -19,6 +19,7 @@ final class SharedStore {
         static let selection = "selection"
         static let onboarded = "onboarded"
         static let userName = "userName"
+        static let userAge = "userAge"
         static let limitEnabled = "limitEnabled"
         static let dailyLimitMinutes = "dailyLimitMinutes"
         static let limitReachedDay = "limitReachedDay"
@@ -79,6 +80,11 @@ final class SharedStore {
     var userName: String {
         get { defaults.string(forKey: Keys.userName) ?? "" }
         set { defaults.set(newValue, forKey: Keys.userName) }
+    }
+
+    var userAge: Int {
+        get { let v = defaults.integer(forKey: Keys.userAge); return v == 0 ? 18 : v }
+        set { defaults.set(newValue, forKey: Keys.userAge) }
     }
 
     var quizResult: QuizResult? {

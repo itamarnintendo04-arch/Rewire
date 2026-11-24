@@ -20,19 +20,19 @@ struct PermissionView: View {
                 }
                 .padding(.top, 20)
 
-                StepHeader(title: "חיבור לזמן מסך",
-                           subtitle: "Rewire משתמש ב-Screen Time של אפל כדי לחסום אפליקציות ולמדוד את הזמן שלך.")
+                StepHeader(title: "Connect to Screen Time",
+                           subtitle: "Rewire uses Apple's Screen Time to block apps and measure your usage.")
 
                 Card {
                     VStack(alignment: .leading, spacing: 14) {
-                        privacyRow("lock.fill", "הנתונים נשארים במכשיר שלך בלבד")
-                        privacyRow("eye.slash.fill", "אנחנו לא רואים מה את/ה עושה באפליקציות")
-                        privacyRow("apple.logo", "החיבור מאובטח ע״י אפל עם Face ID")
+                        privacyRow("lock.fill", "Your data never leaves your device")
+                        privacyRow("eye.slash.fill", "We can't see what you do inside apps")
+                        privacyRow("apple.logo", "Secured by Apple with Face ID")
                     }
                 }
 
                 if denied {
-                    Text("ההרשאה נדחתה. אפשר לאשר אותה בהגדרות ← זמן מסך, או לנסות שוב.")
+                    Text("Permission was denied. You can allow it in Settings → Screen Time, or try again.")
                         .font(.footnote).foregroundStyle(Theme.warning)
                         .multilineTextAlignment(.center)
                 }
@@ -49,13 +49,13 @@ struct PermissionView: View {
                 } label: {
                     HStack {
                         if requesting { ProgressView().tint(.white) }
-                        Text(model.isAuthorized ? "מחובר ✓ המשך" : "חבר/י לזמן מסך")
+                        Text(model.isAuthorized ? "Connected ✓ Continue" : "Connect Screen Time")
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(requesting)
 
-                Text("בחלון הבא בחר/י \"המשך\" ואשר/י עם הקוד או Face ID")
+                Text("In the next dialog tap \"Continue\" and confirm with your passcode or Face ID")
                     .font(.footnote).foregroundStyle(.white.opacity(0.45))
                     .multilineTextAlignment(.center)
             }
@@ -81,13 +81,13 @@ struct SelectAppsView: View {
     var body: some View {
         OnboardingPage {
             VStack(alignment: .leading, spacing: 24) {
-                StepHeader(title: "אילו אפליקציות לחסום?",
-                           subtitle: "בחר/י אפליקציות, קטגוריות שלמות או אתרים. אפשר לשנות בכל רגע.")
+                StepHeader(title: "Which apps should we block?",
+                           subtitle: "Choose apps, whole categories or websites. You can change this anytime.")
 
                 if let apps = model.quizResult?.topApps, !apps.isEmpty {
                     Card {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("💡 לפי השאלון, כדאי לבחור:").font(.subheadline.weight(.semibold))
+                            Text("💡 Based on your quiz, consider:").font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.white)
                             Text(apps.joined(separator: " · "))
                                 .font(.subheadline).foregroundStyle(.white.opacity(0.7))
@@ -100,10 +100,10 @@ struct SelectAppsView: View {
         } footer: {
             VStack(spacing: 10) {
                 if model.selectionCount == 0 {
-                    Button("בחר/י אפליקציות") { showPicker = true }
+                    Button("Choose apps") { showPicker = true }
                         .buttonStyle(PrimaryButtonStyle())
                 } else {
-                    Button("המשך", action: onNext).buttonStyle(PrimaryButtonStyle())
+                    Button("Continue", action: onNext).buttonStyle(PrimaryButtonStyle())
                 }
             }
         }
@@ -124,7 +124,7 @@ struct SelectionSummary: View {
                         Image(systemName: "square.grid.2x2.fill").foregroundStyle(Theme.accent)
                         Text(title).font(.headline).foregroundStyle(.white)
                         Spacer()
-                        Text(isEmpty ? "בחירה" : "עריכה")
+                        Text(isEmpty ? "Choose" : "Edit")
                             .font(.subheadline.weight(.semibold)).foregroundStyle(Theme.accent)
                     }
                     if !isEmpty {
@@ -137,7 +137,7 @@ struct SelectionSummary: View {
                             }
                         }
                         if !selection.webDomainTokens.isEmpty {
-                            Text("+ \(selection.webDomainTokens.count) אתרים")
+                            Text("+ \(selection.webDomainTokens.count) websites")
                                 .font(.caption).foregroundStyle(.white.opacity(0.6))
                         }
                     }
@@ -152,11 +152,11 @@ struct SelectionSummary: View {
     }
 
     private var title: String {
-        if isEmpty { return "עוד לא נבחרו אפליקציות" }
+        if isEmpty { return "No apps selected yet" }
         var parts: [String] = []
-        if !selection.applicationTokens.isEmpty { parts.append("\(selection.applicationTokens.count) אפליקציות") }
-        if !selection.categoryTokens.isEmpty { parts.append("\(selection.categoryTokens.count) קטגוריות") }
-        if !selection.webDomainTokens.isEmpty { parts.append("\(selection.webDomainTokens.count) אתרים") }
+        if !selection.applicationTokens.isEmpty { parts.append("\(selection.applicationTokens.count) apps") }
+        if !selection.categoryTokens.isEmpty { parts.append("\(selection.categoryTokens.count) categories") }
+        if !selection.webDomainTokens.isEmpty { parts.append("\(selection.webDomainTokens.count) sites") }
         return parts.joined(separator: " · ")
     }
 }
@@ -170,12 +170,12 @@ struct DailyLimitSetupView: View {
     var body: some View {
         OnboardingPage {
             VStack(alignment: .leading, spacing: 24) {
-                StepHeader(title: "מגבלה יומית",
-                           subtitle: "כמה זמן ביום מותר לך באפליקציות שבחרת? אחרי זה – הן ננעלות עד מחר.")
+                StepHeader(title: "Daily limit",
+                           subtitle: "How much time per day do you allow yourself in these apps? After that they lock until tomorrow.")
                 DailyLimitEditor()
             }
         } footer: {
-            Button("המשך") { model.applyRules(); onNext() }.buttonStyle(PrimaryButtonStyle())
+            Button("Continue") { model.applyRules(); onNext() }.buttonStyle(PrimaryButtonStyle())
         }
     }
 }
@@ -187,7 +187,7 @@ struct DailyLimitEditor: View {
     var body: some View {
         VStack(spacing: 20) {
             Toggle(isOn: $model.limitEnabled) {
-                Text("הפעל/י מגבלה יומית").font(.headline).foregroundStyle(.white)
+                Text("Enable daily limit").font(.headline).foregroundStyle(.white)
             }
             .tint(Theme.accent)
 
@@ -221,7 +221,7 @@ struct DailyLimitEditor: View {
                     }
                 }
 
-                Text("היעד הכולל שלך: \(formatMinutes(model.goalMinutes)) ביום. מומלץ לתת לאפליקציות המסיחות עד חצי ממנו.")
+                Text("Your overall goal: \(formatMinutes(model.goalMinutes)) a day. We recommend giving distracting apps at most half of it.")
                     .font(.footnote).foregroundStyle(.white.opacity(0.55))
             }
         }
@@ -237,12 +237,12 @@ struct ScheduleSetupView: View {
     var body: some View {
         OnboardingPage {
             VStack(alignment: .leading, spacing: 24) {
-                StepHeader(title: "זמני חסימה קבועים",
-                           subtitle: "למשל לילה טוב בלי טלפון: האפליקציות ייחסמו אוטומטית בכל יום בשעות האלה.")
+                StepHeader(title: "Scheduled block times",
+                           subtitle: "For example, phone-free nights: your apps block automatically every day during these hours.")
                 ScheduleEditor()
             }
         } footer: {
-            Button("המשך") { model.applyRules(); onNext() }.buttonStyle(PrimaryButtonStyle())
+            Button("Continue") { model.applyRules(); onNext() }.buttonStyle(PrimaryButtonStyle())
         }
     }
 }
@@ -253,23 +253,23 @@ struct ScheduleEditor: View {
     var body: some View {
         VStack(spacing: 18) {
             Toggle(isOn: $model.scheduleEnabled) {
-                Text("🌙 הפעל/י חסימה מתוזמנת").font(.headline).foregroundStyle(.white)
+                Text("🌙 Enable scheduled blocking").font(.headline).foregroundStyle(.white)
             }
             .tint(Theme.accent)
 
             if model.scheduleEnabled {
                 Card {
                     VStack(spacing: 14) {
-                        DatePicker("מתחיל", selection: $model.scheduleStart, displayedComponents: .hourAndMinute)
+                        DatePicker("Starts", selection: $model.scheduleStart, displayedComponents: .hourAndMinute)
                         Divider().overlay(Theme.stroke)
-                        DatePicker("נגמר", selection: $model.scheduleEnd, displayedComponents: .hourAndMinute)
+                        DatePicker("Ends", selection: $model.scheduleEnd, displayedComponents: .hourAndMinute)
                     }
                     .foregroundStyle(.white)
                 }
                 HStack(spacing: 10) {
-                    preset("לילה", 22 * 60, 7 * 60)
-                    preset("לימודים", 8 * 60, 14 * 60)
-                    preset("עבודה", 9 * 60, 17 * 60)
+                    preset("Night", 22 * 60, 7 * 60)
+                    preset("School", 8 * 60, 14 * 60)
+                    preset("Work", 9 * 60, 17 * 60)
                 }
             }
         }
@@ -304,20 +304,21 @@ struct CommitmentView: View {
     var body: some View {
         OnboardingPage {
             VStack(spacing: 26) {
-                StepHeader(title: "ההתחייבות שלך",
-                           subtitle: "שינוי מתחיל בהחלטה. החזק/י את האצבע כדי להתחייב.")
+                StepHeader(title: "Your commitment",
+                           subtitle: "Change starts with a decision. Press and hold to commit.")
 
                 Card {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("אני, \(model.userName), מתחייב/ת:").font(.headline).foregroundStyle(.white)
-                        pledge("להשתמש בטלפון בכוונה, לא מתוך הרגל")
+                        Text("I, \(model.userName), commit to:").font(.headline).foregroundStyle(.white)
+                        pledge("Use my phone with intention, not out of habit")
+                        pledge("Reach my goal of \(formatMinutes(model.goalMinutes)) of screen time a day")
                         if model.limitEnabled {
-                            pledge("לא יותר מ-\(formatMinutes(model.dailyLimitMinutes)) ביום באפליקציות שבחרתי")
+                            pledge("No more than \(formatMinutes(model.dailyLimitMinutes)) a day in the apps I chose")
                         }
                         if model.scheduleEnabled {
-                            pledge("לשמור על זמני החסימה הקבועים שלי")
+                            pledge("Respect my scheduled block times")
                         }
-                        pledge("להחזיר לעצמי את הזמן, הריכוז והשינה")
+                        pledge("Take back my time, focus and sleep")
                     }
                 }
 
@@ -338,7 +339,7 @@ struct CommitmentView: View {
                         .onChanged { _ in if !holding { holding = true; hapticTap(.medium) } }
                         .onEnded { _ in holding = false }
                 )
-                Text(done ? "מעולה! יוצאים לדרך 🚀" : "החזק/י 3 שניות")
+                Text(done ? "Awesome! Let's go 🚀" : "Hold for 3 seconds")
                     .font(.subheadline.weight(.semibold)).foregroundStyle(.white.opacity(0.7))
             }
         } footer: {

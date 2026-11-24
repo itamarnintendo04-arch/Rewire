@@ -35,7 +35,7 @@ struct HomeView: View {
             statusCard
             streakRow
             DeviceActivityReport(.today, filter: ReportFilters.today)
-                .frame(minHeight: 380)
+                .frame(minHeight: 400)
             quickActions
             if let r = model.quizResult { scoreCard(r) }
         }
@@ -48,7 +48,7 @@ struct HomeView: View {
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        let part = h < 12 ? "בוקר טוב" : (h < 18 ? "צהריים טובים" : "ערב טוב")
+        let part = h < 12 ? "Good morning" : (h < 18 ? "Good afternoon" : "Good evening")
         return model.userName.isEmpty ? part : "\(part), \(model.userName)"
     }
 
@@ -58,11 +58,11 @@ struct HomeView: View {
         Card {
             VStack(alignment: .leading, spacing: 12) {
                 if let until = model.unlockUntil, until > now {
-                    statusHeader("🔓", "שחרור זמני", Theme.warning)
-                    Text("נועל שוב בעוד \(countdown(to: until))")
+                    statusHeader("🔓", "Temporarily unlocked", Theme.warning)
+                    Text("Locks again in \(countdown(to: until))")
                         .font(.system(size: 28, weight: .heavy, design: .rounded).monospacedDigit())
                         .foregroundStyle(.white)
-                    Button("נעל עכשיו") { model.relockNow() }
+                    Button("Lock now") { model.relockNow() }
                         .buttonStyle(SecondaryButtonStyle())
                 } else if let reason = model.activeReason {
                     statusHeader(reason.emoji, reason.title, Theme.danger)
@@ -71,23 +71,23 @@ struct HomeView: View {
                             .font(.system(size: 40, weight: .heavy, design: .rounded).monospacedDigit())
                             .foregroundStyle(.white)
                     } else {
-                        Text("\(model.selectionCount) פריטים חסומים כרגע")
+                        Text("\(model.selectionCount) items blocked right now")
                             .foregroundStyle(.white.opacity(0.7))
                     }
                     if model.canUnlock {
-                        Button("צריך/ה כמה דקות? (\(model.unlocksLeft) נשארו)") { model.showUnlockFlow = true }
+                        Button("Need a few minutes? (\(model.unlocksLeft) left)") { model.showUnlockFlow = true }
                             .buttonStyle(SecondaryButtonStyle())
                     }
                 } else {
-                    statusHeader("✅", "הכל פתוח כרגע", Theme.neon)
+                    statusHeader("✅", "Everything is open", Theme.neon)
                     Text(model.limitEnabled
-                         ? "מגבלה יומית: \(formatMinutes(model.dailyLimitMinutes)) באפליקציות שבחרת"
-                         : "אין מגבלה יומית פעילה")
+                         ? "Daily limit: \(formatMinutes(model.dailyLimitMinutes)) in your chosen apps"
+                         : "No daily limit active")
                         .foregroundStyle(.white.opacity(0.7))
                 }
 
                 if !model.isAuthorized {
-                    Label("אין הרשאת זמן מסך – החסימה לא תעבוד", systemImage: "exclamationmark.triangle.fill")
+                    Label("No Screen Time permission – blocking won't work", systemImage: "exclamationmark.triangle.fill")
                         .font(.footnote.weight(.semibold)).foregroundStyle(Theme.warning)
                 }
             }
@@ -106,9 +106,9 @@ struct HomeView: View {
 
     private var streakRow: some View {
         HStack(spacing: 12) {
-            statTile(icon: "flame.fill", color: .orange, value: "\(model.streak)", label: "ימי רצף")
-            statTile(icon: "trophy.fill", color: .yellow, value: "\(model.bestStreak)", label: "שיא")
-            statTile(icon: "hand.raised.fill", color: Theme.accent, value: "\(model.blockedOpensToday)", label: "נחסמו היום")
+            statTile(icon: "flame.fill", color: .orange, value: "\(model.streak)", label: "Day streak")
+            statTile(icon: "trophy.fill", color: .yellow, value: "\(model.bestStreak)", label: "Best")
+            statTile(icon: "hand.raised.fill", color: Theme.accent, value: "\(model.blockedOpensToday)", label: "Blocked today")
         }
     }
 
@@ -128,7 +128,7 @@ struct HomeView: View {
 
     private var quickActions: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("פוקוס מהיר").font(.headline).foregroundStyle(.white)
+            Text("Quick focus").font(.headline).foregroundStyle(.white)
             HStack(spacing: 10) {
                 ForEach([25, 60, 120], id: \.self) { m in
                     Button {
@@ -156,9 +156,9 @@ struct HomeView: View {
             HStack(spacing: 16) {
                 ScoreRing(score: r.score, size: 80)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ציון ה-Brain Rot ההתחלתי").font(.subheadline).foregroundStyle(.white.opacity(0.6))
+                    Text("Starting Brain Rot score").font(.subheadline).foregroundStyle(.white.opacity(0.6))
                     Text(r.verdict.title).font(.headline).foregroundStyle(.white)
-                    Text("יעד: \(formatMinutes(model.goalMinutes)) ביום · \(String(format: "%.1f", r.yearsRegained)) שנים בחזרה")
+                    Text("Goal: \(formatMinutes(model.goalMinutes))/day · \(String(format: "%.1f", r.yearsRegained)) years back")
                         .font(.caption).foregroundStyle(Theme.neon)
                 }
             }

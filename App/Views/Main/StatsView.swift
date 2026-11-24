@@ -5,31 +5,31 @@ struct StatsView: View {
     @EnvironmentObject var model: AppModel
 
     var body: some View {
-        Screen(title: "סטטיסטיקה") {
+        Screen(title: "Stats") {
             DeviceActivityReport(.week, filter: ReportFilters.week)
                 .frame(minHeight: 300)
 
             HStack(spacing: 12) {
-                tile("🔥", "\(model.streak)", "רצף נוכחי")
-                tile("🏆", "\(model.bestStreak)", "רצף שיא")
+                tile("🔥", "\(model.streak)", "Current streak")
+                tile("🏆", "\(model.bestStreak)", "Best streak")
             }
             HStack(spacing: 12) {
-                tile("🎯", formatMinutes(model.focusMinutesTotal), "בפוקוס סה״כ")
-                tile("🛡️", "\(model.blockedOpensToday)", "ניסיונות נחסמו היום")
+                tile("🎯", formatMinutes(model.focusMinutesTotal), "Total focus")
+                tile("🛡️", "\(model.blockedOpensToday)", "Blocked today")
             }
 
             DeviceActivityReport(.today, filter: ReportFilters.today)
-                .frame(minHeight: 380)
+                .frame(minHeight: 400)
 
             if let r = model.quizResult {
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("ההתחלה שלך").font(.headline).foregroundStyle(.white)
-                        Text("התחלת עם \(formatMinutes(r.currentMinutes)) ביום וציון \(r.score)/100.")
+                        Text("Where you started").font(.headline).foregroundStyle(.white)
+                        Text("You started at \(formatMinutes(r.currentMinutes)) a day with a score of \(r.score)/100.")
                             .foregroundStyle(.white.opacity(0.7))
-                        Text("היעד שלך: \(formatMinutes(model.goalMinutes)) ביום.")
+                        Text("Your goal: \(formatMinutes(model.goalMinutes)) a day.")
                             .foregroundStyle(Theme.neon)
-                        Text("השווה/י לממוצע השבועי למעלה כדי לראות את ההתקדמות.")
+                        Text("Compare with the weekly average above to see your progress.")
                             .font(.footnote).foregroundStyle(.white.opacity(0.5))
                     }
                 }

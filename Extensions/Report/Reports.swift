@@ -46,7 +46,7 @@ struct TodayReport: DeviceActivityReportScene {
                 for await category in segment.categories {
                     for await app in category.applications {
                         let name = app.application.localizedDisplayName
-                            ?? app.application.bundleIdentifier ?? "אפליקציה"
+                            ?? app.application.bundleIdentifier ?? "App"
                         let key = app.application.bundleIdentifier ?? name
                         let prev = byApp[key]
                         byApp[key] = AppUsage(id: key,
@@ -92,6 +92,6 @@ struct WeekReport: DeviceActivityReportScene {
 func formatDuration(_ t: TimeInterval) -> String {
     let minutes = Int(t / 60)
     let h = minutes / 60, m = minutes % 60
-    if h == 0 { return "\(m) דק׳" }
-    return m == 0 ? "\(h) שע׳" : "\(h) שע׳ \(m) דק׳"
+    if h == 0 { return "\(m)m" }
+    return m == 0 ? "\(h)h" : "\(h)h \(m)m"
 }

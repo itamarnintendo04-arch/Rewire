@@ -6,18 +6,17 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             HomeView()
-                .tabItem { Label("בית", systemImage: "house.fill") }
+                .tabItem { Label("Home", systemImage: "house.fill") }
             FocusView()
-                .tabItem { Label("פוקוס", systemImage: "lock.fill") }
+                .tabItem { Label("Focus", systemImage: "lock.fill") }
             StatsView()
-                .tabItem { Label("סטטיסטיקה", systemImage: "chart.bar.fill") }
+                .tabItem { Label("Stats", systemImage: "chart.bar.fill") }
             SettingsView()
-                .tabItem { Label("הגדרות", systemImage: "gearshape.fill") }
+                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
         .sheet(isPresented: $model.showUnlockFlow) {
             UnlockFlowView()
                 .environmentObject(model)
-                .environment(\.layoutDirection, .rightToLeft)
                 .preferredColorScheme(.dark)
         }
         .onAppear {

@@ -8,7 +8,7 @@ struct ResultsView: View {
         let r = model.quizResult ?? model.quiz.result
         OnboardingPage {
             VStack(spacing: 28) {
-                Text("\(model.userName), זה ציון ה-Brain Rot שלך")
+                Text("\(model.userName), here's your Brain Rot score")
                     .font(.system(size: 24, weight: .heavy, design: .rounded))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white)
@@ -26,23 +26,23 @@ struct ResultsView: View {
 
                 Card {
                     VStack(alignment: .leading, spacing: 14) {
-                        compareRow(label: "הציון שלך", value: r.score, color: Theme.scoreColor(r.score))
-                        compareRow(label: "ממוצע", value: 42, color: .white.opacity(0.4))
-                        compareRow(label: "מטרה בריאה", value: 20, color: Theme.neon)
+                        compareRow(label: "Your score", value: r.score, color: Theme.scoreColor(r.score))
+                        compareRow(label: "Average", value: 42, color: .white.opacity(0.4))
+                        compareRow(label: "Healthy target", value: 20, color: Theme.neon)
                     }
                 }
 
                 if !r.impacts.isEmpty {
                     Card {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("איפה זה פוגע בך").font(.headline).foregroundStyle(.white)
+                            Text("Where it's hurting you").font(.headline).foregroundStyle(.white)
                             FlowTags(tags: r.impacts)
                         }
                     }
                 }
             }
         } footer: {
-            Button("מה זה אומר עליי?", action: onNext).buttonStyle(PrimaryButtonStyle())
+            Button("What does this mean for me?", action: onNext).buttonStyle(PrimaryButtonStyle())
         }
     }
 
@@ -89,16 +89,16 @@ struct ProjectionView: View {
         let r = model.quizResult ?? model.quiz.result
         OnboardingPage {
             VStack(alignment: .leading, spacing: 26) {
-                StepHeader(title: "בקצב הנוכחי…",
-                           subtitle: "\(formatMinutes(r.currentMinutes)) ביום נשמע מעט. בוא/י נראה את התמונה המלאה.")
+                StepHeader(title: "At your current pace…",
+                           subtitle: "\(formatMinutes(r.currentMinutes)) a day sounds small. At \(r.age), here's the full picture.")
 
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("תבלה/י בטלפון").foregroundStyle(.white.opacity(0.7))
-                        Text("\(String(format: "%.1f", r.yearsOnPhone)) שנים")
+                        Text("You'll spend").foregroundStyle(.white.opacity(0.7))
+                        Text("\(String(format: "%.1f", r.yearsOnPhone)) years")
                             .font(.system(size: 52, weight: .black, design: .rounded))
                             .foregroundStyle(Theme.danger)
-                        Text("מתוך שארית החיים שלך. זה \(Int(r.dailyHours * 365)) שעות כל שנה.")
+                        Text("of the rest of your life on your phone. That's \(Int(r.dailyHours * 365)) hours every year.")
                             .font(.subheadline).foregroundStyle(.white.opacity(0.6))
                     }
                 }
@@ -106,11 +106,11 @@ struct ProjectionView: View {
 
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("עם Rewire תחזיר/י לעצמך").foregroundStyle(.white.opacity(0.7))
-                        Text("\(String(format: "%.1f", r.yearsRegained)) שנים")
+                        Text("With Rewire you'll get back").foregroundStyle(.white.opacity(0.7))
+                        Text("\(String(format: "%.1f", r.yearsRegained)) years")
                             .font(.system(size: 52, weight: .black, design: .rounded))
                             .foregroundStyle(Theme.neon)
-                        Text("רק מלרדת מ-\(formatMinutes(r.currentMinutes)) ל-\(formatMinutes(r.goalMinutes ?? r.currentMinutes)) ביום.")
+                        Text("Just by going from \(formatMinutes(r.currentMinutes)) to \(formatMinutes(r.goalMinutes ?? r.currentMinutes)) a day.")
                             .font(.subheadline).foregroundStyle(.white.opacity(0.6))
                     }
                 }
@@ -118,17 +118,17 @@ struct ProjectionView: View {
                 .animation(.easeOut(duration: 0.6).delay(0.5), value: appear)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("מה אפשר לעשות עם הזמן הזה:").font(.headline).foregroundStyle(.white)
-                    benefit("📚", "לקרוא \(Int(r.goalHoursSaved * 365 / 6)) ספרים בשנה")
-                    benefit("🏃", "להתאמן \(Int(r.goalHoursSaved * 365 / 1)) שעות בשנה")
-                    benefit("🌍", "ללמוד שפה חדשה תוך שנה")
-                    benefit("😴", "לישון טוב יותר כבר מהשבוע הראשון")
+                    Text("What you could do with that time:").font(.headline).foregroundStyle(.white)
+                    benefit("📚", "Read \(Int(r.goalHoursSaved * 365 / 6)) books a year")
+                    benefit("🏃", "Work out \(Int(r.goalHoursSaved * 365)) hours a year")
+                    benefit("🌍", "Learn a new language within a year")
+                    benefit("😴", "Sleep better from the very first week")
                 }
                 .opacity(appear ? 1 : 0)
                 .animation(.easeOut(duration: 0.6).delay(0.9), value: appear)
             }
         } footer: {
-            Button("אני רוצה את הזמן שלי בחזרה", action: onNext).buttonStyle(PrimaryButtonStyle())
+            Button("I want my time back", action: onNext).buttonStyle(PrimaryButtonStyle())
         }
         .onAppear { withAnimation(.easeOut(duration: 0.6)) { appear = true } }
     }
@@ -147,18 +147,18 @@ struct HowItWorksView: View {
     var body: some View {
         OnboardingPage {
             VStack(alignment: .leading, spacing: 24) {
-                StepHeader(title: "איך Rewire עובד", subtitle: "שלושה צעדים פשוטים לשליטה מחדש")
-                step(1, "lock.shield.fill", "בוחרים אפליקציות", "TikTok, אינסטגרם, משחקים – מה שגונב לך זמן.")
-                step(2, "hourglass", "קובעים חוקים", "מגבלה יומית, זמני חסימה קבועים וסשנים של פוקוס.")
-                step(3, "hand.raised.fill", "Rewire חוסם", "כשנגמר הזמן מופיע מסך חסימה. כדי לפתוח צריך לעצור ולנשום.")
-                step(4, "flame.fill", "בונים רצף", "כל יום בלי לחרוג מהמגבלה מוסיף לרצף שלך.")
+                StepHeader(title: "How Rewire works", subtitle: "A few simple steps to take back control")
+                step("lock.shield.fill", "Pick your apps", "TikTok, Instagram, games – whatever steals your time.")
+                step("hourglass", "Set your rules", "A daily limit, scheduled block times and focus sessions.")
+                step("hand.raised.fill", "Rewire blocks", "When time's up, a block screen appears. To open it you have to pause and breathe.")
+                step("flame.fill", "Build a streak", "Every day you stay under your limit adds to your streak.")
             }
         } footer: {
-            Button("הבנתי, בוא/י נמשיך", action: onNext).buttonStyle(PrimaryButtonStyle())
+            Button("Got it, let's go", action: onNext).buttonStyle(PrimaryButtonStyle())
         }
     }
 
-    private func step(_ n: Int, _ icon: String, _ title: String, _ detail: String) -> some View {
+    private func step(_ icon: String, _ title: String, _ detail: String) -> some View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
                 RoundedRectangle(cornerRadius: 14).fill(Theme.accent.opacity(0.2)).frame(width: 52, height: 52)

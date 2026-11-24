@@ -26,13 +26,13 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     // MARK: -
 
     private static let quotes = [
-        "המוח שלך שווה יותר מעוד סרטון.",
-        "הגלילה הבאה לא תשנה לך את החיים. מה כן?",
-        "כל פעם שאת/ה לא פותח/ת – המוח נבנה מחדש.",
-        "שעה ביום = 3 שנים מהחיים. תבחר/י בהן.",
-        "הדבר הכי מעניין עכשיו נמצא מחוץ למסך.",
-        "את/ה שולט/ת בטלפון. לא הוא בך.",
-        "נשימה עמוקה. מה באמת חיפשת?",
+        "Your brain is worth more than another video.",
+        "The next scroll won't change your life. What will?",
+        "Every time you don't open it, your brain rewires.",
+        "One hour a day = 3 years of your life. Choose them.",
+        "The most interesting thing right now is off-screen.",
+        "You control your phone. Not the other way around.",
+        "Take a deep breath. What were you really looking for?",
     ]
 
     private func make(name: String?) -> ShieldConfiguration {
@@ -40,19 +40,19 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         store.recordBlockedOpen()
 
         let reason = store.activeReason ?? .limit
-        let appName = name ?? "האפליקציה הזו"
+        let appName = name ?? "This app"
         let quote = Self.quotes.randomElement() ?? Self.quotes[0]
 
-        var subtitle = "\(appName) חסומה – \(reason.title).\n\n\"\(quote)\""
+        var subtitle = "\(appName) is blocked – \(reason.title).\n\n\"\(quote)\""
         if reason == .session, let end = store.sessionEnd {
             let f = DateFormatter()
-            f.dateFormat = "HH:mm"
-            subtitle += "\n\nהסשן נגמר ב-\(f.string(from: end))"
+            f.timeStyle = .short
+            subtitle += "\n\nSession ends at \(f.string(from: end))"
         }
 
         let opens = store.blockedOpensToday
         if opens > 1 {
-            subtitle += "\nניסית לפתוח אפליקציות חסומות \(opens) פעמים היום."
+            subtitle += "\nYou've tried to open blocked apps \(opens) times today."
         }
 
         let requested = (store.unlockRequestedAt.map { Date().timeIntervalSince($0) < 120 }) ?? false
@@ -60,9 +60,9 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
         let secondary: ShieldConfiguration.Label?
         if requested {
-            secondary = .init(text: "📲 לחצ/י על ההתראה", color: .lightGray)
+            secondary = .init(text: "📲 Tap the notification", color: .lightGray)
         } else if canUnlock {
-            secondary = .init(text: "אני צריך/ה עוד כמה דקות (\(store.unlocksLeftToday))", color: .lightGray)
+            secondary = .init(text: "I need a few minutes (\(store.unlocksLeftToday) left)", color: .lightGray)
         } else {
             secondary = nil
         }
@@ -76,9 +76,9 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             backgroundBlurStyle: .systemUltraThinMaterialDark,
             backgroundColor: UIColor(red: 0.05, green: 0.04, blue: 0.10, alpha: 0.92),
             icon: icon,
-            title: .init(text: "\(reason.emoji) רגע, עצור/י", color: .white),
+            title: .init(text: "\(reason.emoji) Hold on", color: .white),
             subtitle: .init(text: subtitle, color: UIColor(white: 0.85, alpha: 1)),
-            primaryButtonLabel: .init(text: "סגור – חוזר/ת לחיים", color: .white),
+            primaryButtonLabel: .init(text: "Close – back to life", color: .white),
             primaryButtonBackgroundColor: accent,
             secondaryButtonLabel: secondary
         )

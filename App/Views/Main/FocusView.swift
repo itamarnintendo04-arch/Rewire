@@ -11,7 +11,7 @@ struct FocusView: View {
     private let presets = [15, 25, 45, 60, 90, 120, 180, 240]
 
     var body: some View {
-        Screen(title: "סשן פוקוס") {
+        Screen(title: "Focus session") {
             if let end = model.sessionEnd, end > now {
                 activeSession(end: end)
             } else {
@@ -23,11 +23,11 @@ struct FocusView: View {
             if let end = model.sessionEnd, end <= t { model.refresh() }
         }
         .familyActivityPicker(isPresented: $showPicker, selection: $model.selection)
-        .alert("לסיים את הסשן מוקדם?", isPresented: $confirmEnd) {
-            Button("להמשיך להתרכז", role: .cancel) {}
-            Button("לסיים", role: .destructive) { model.endSessionEarly() }
+        .alert("End the session early?", isPresented: $confirmEnd) {
+            Button("Keep focusing", role: .cancel) {}
+            Button("End", role: .destructive) { model.endSessionEarly() }
         } message: {
-            Text("עוד קצת ואת/ה שם. בטוח/ה?")
+            Text("You're almost there. Are you sure?")
         }
     }
 
@@ -35,7 +35,7 @@ struct FocusView: View {
         VStack(spacing: 22) {
             Card {
                 VStack(spacing: 18) {
-                    Text("חסום/י את כל האפליקציות שבחרת למשך:")
+                    Text("Block all your chosen apps for:")
                         .font(.headline).foregroundStyle(.white)
                     Text(formatMinutes(minutes))
                         .font(.system(size: 60, weight: .black, design: .rounded))
@@ -59,7 +59,7 @@ struct FocusView: View {
             SelectionSummary(selection: model.selection) { showPicker = true }
 
             if model.strictMode {
-                Label("מצב קשוח פעיל: אי אפשר לסיים את הסשן מוקדם", systemImage: "lock.trianglebadge.exclamationmark.fill")
+                Label("Strict mode is on: sessions can't be ended early", systemImage: "lock.trianglebadge.exclamationmark.fill")
                     .font(.footnote.weight(.semibold)).foregroundStyle(Theme.warning)
             }
 
@@ -67,7 +67,7 @@ struct FocusView: View {
                 hapticTap(.heavy)
                 model.startSession(minutes: minutes)
             } label: {
-                Label("התחל/י פוקוס", systemImage: "lock.fill")
+                Label("Start focus", systemImage: "lock.fill")
             }
             .buttonStyle(PrimaryButtonStyle(enabled: model.selectionCount > 0))
             .disabled(model.selectionCount == 0)
@@ -88,18 +88,18 @@ struct FocusView: View {
                     Text(clock(remaining))
                         .font(.system(size: 50, weight: .heavy, design: .rounded).monospacedDigit())
                         .foregroundStyle(.white)
-                    Text("נשאר").foregroundStyle(.white.opacity(0.6))
+                    Text("remaining").foregroundStyle(.white.opacity(0.6))
                 }
             }
             .frame(width: 270, height: 270)
             .padding(.top, 20)
 
-            Text("🎯 האפליקציות שלך חסומות. זה הזמן לעשות משהו אמיתי.")
+            Text("🎯 Your apps are blocked. Time to do something real.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.white.opacity(0.8))
 
             if model.canEndSessionEarly {
-                Button("סיים/י מוקדם") { confirmEnd = true }
+                Button("End early") { confirmEnd = true }
                     .buttonStyle(SecondaryButtonStyle())
             }
         }

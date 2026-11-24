@@ -11,8 +11,6 @@ struct RewireApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(model)
-                .environment(\.layoutDirection, .rightToLeft)
-                .environment(\.locale, Locale(identifier: "he"))
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
                 .onReceive(NotificationCenter.default.publisher(for: .rewireOpenUnlock)) { _ in

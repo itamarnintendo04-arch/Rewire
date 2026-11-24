@@ -11,6 +11,7 @@ final class AppModel: ObservableObject {
     // Onboarding / profile
     @Published var hasOnboarded: Bool
     @Published var userName: String { didSet { store.userName = userName } }
+    @Published var userAge: Int { didSet { store.userAge = userAge; quiz.age = userAge } }
     @Published var quiz = QuizState()
     @Published var quizResult: QuizResult?
 
@@ -46,6 +47,7 @@ final class AppModel: ObservableObject {
     init() {
         hasOnboarded = store.hasOnboarded
         userName = store.userName
+        userAge = store.userAge
         quizResult = store.quizResult
         selection = store.selection
         limitEnabled = store.limitEnabled
@@ -111,7 +113,7 @@ final class AppModel: ObservableObject {
                 .requestAuthorization(options: [.alert, .sound, .badge])
             return isAuthorized
         } catch {
-            errorMessage = "לא הצלחנו להתחבר לזמן מסך: \(error.localizedDescription)"
+            errorMessage = "Couldn't connect to Screen Time: \(error.localizedDescription)"
             return false
         }
     }
@@ -119,6 +121,7 @@ final class AppModel: ObservableObject {
     // MARK: - Onboarding
 
     func finishQuiz() {
+        quiz.age = userAge
         let r = quiz.result
         quizResult = r
         store.quizResult = r
@@ -151,7 +154,7 @@ final class AppModel: ObservableObject {
 
     func startSession(minutes: Int) {
         guard store.hasSelection else {
-            errorMessage = "קודם צריך לבחור אפליקציות לחסימה."
+            errorMessage = "Choose apps to block first."
             return
         }
         let end = Date().addingTimeInterval(TimeInterval(minutes * 60))
@@ -163,7 +166,7 @@ final class AppModel: ObservableObject {
             ActivityScheduler.stop(.unlock)
             refresh()
         } catch {
-            errorMessage = "לא הצלחנו להתחיל סשן: \(error.localizedDescription)"
+            errorMessage = "Couldn't start the session: \(error.localizedDescription)"
         }
     }
 
@@ -193,7 +196,7 @@ final class AppModel: ObservableObject {
             ShieldController.clear()
             refresh()
         } catch {
-            errorMessage = "לא הצלחנו לשחרר: \(error.localizedDescription)"
+            errorMessage = "Couldn't unlock: \(error.localizedDescription)"
         }
     }
 
@@ -217,6 +220,6 @@ extension Date {
 
 func formatMinutes(_ minutes: Int) -> String {
     let h = minutes / 60, m = minutes % 60
-    if h == 0 { return "\(m) דק׳" }
-    return m == 0 ? "\(h) שע׳" : "\(h) שע׳ \(m) דק׳"
+    if h == 0 { return "\(m) min" }
+    return m == 0 ? "\(h) hr" : "\(h) hr \(m) min"
 }

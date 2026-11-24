@@ -90,7 +90,7 @@ struct ProjectionView: View {
         OnboardingPage {
             VStack(alignment: .leading, spacing: 26) {
                 StepHeader(title: "בקצב הנוכחי…",
-                           subtitle: "\(String(format: "%.0f", r.dailyHours)) שעות ביום נשמע מעט. בוא/י נראה את התמונה המלאה.")
+                           subtitle: "\(formatMinutes(r.currentMinutes)) ביום נשמע מעט. בוא/י נראה את התמונה המלאה.")
 
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
@@ -110,7 +110,7 @@ struct ProjectionView: View {
                         Text("\(String(format: "%.1f", r.yearsRegained)) שנים")
                             .font(.system(size: 52, weight: .black, design: .rounded))
                             .foregroundStyle(Theme.neon)
-                        Text("רק מלהוריד \(formatMinutes(Int(r.goalHoursSaved * 60))) ביום.")
+                        Text("רק מלרדת מ-\(formatMinutes(r.currentMinutes)) ל-\(formatMinutes(r.goalMinutes ?? r.currentMinutes)) ביום.")
                             .font(.subheadline).foregroundStyle(.white.opacity(0.6))
                     }
                 }

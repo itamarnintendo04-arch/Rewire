@@ -158,7 +158,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("ציון ה-Brain Rot ההתחלתי").font(.subheadline).foregroundStyle(.white.opacity(0.6))
                     Text(r.verdict.title).font(.headline).foregroundStyle(.white)
-                    Text("המטרה: להחזיר \(String(format: "%.1f", r.yearsRegained)) שנים לחיים")
+                    Text("יעד: \(formatMinutes(model.goalMinutes)) ביום · \(String(format: "%.1f", r.yearsRegained)) שנים בחזרה")
                         .font(.caption).foregroundStyle(Theme.neon)
                 }
             }

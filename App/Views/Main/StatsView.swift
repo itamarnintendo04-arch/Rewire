@@ -25,8 +25,10 @@ struct StatsView: View {
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("ההתחלה שלך").font(.headline).foregroundStyle(.white)
-                        Text("התחלת עם \(formatMinutes(Int(r.dailyHours * 60))) ביום וציון \(r.score)/100.")
+                        Text("התחלת עם \(formatMinutes(r.currentMinutes)) ביום וציון \(r.score)/100.")
                             .foregroundStyle(.white.opacity(0.7))
+                        Text("היעד שלך: \(formatMinutes(model.goalMinutes)) ביום.")
+                            .foregroundStyle(Theme.neon)
                         Text("השווה/י לממוצע השבועי למעלה כדי לראות את ההתקדמות.")
                             .font(.footnote).foregroundStyle(.white.opacity(0.5))
                     }

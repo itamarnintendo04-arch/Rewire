@@ -29,6 +29,7 @@ final class AppModel: ObservableObject {
     @Published var maxUnlocksPerDay: Int { didSet { store.maxUnlocksPerDay = maxUnlocksPerDay } }
     @Published var unlockWaitSeconds: Int { didSet { store.unlockWaitSeconds = unlockWaitSeconds } }
     @Published var strictMode: Bool { didSet { store.strictMode = strictMode } }
+    @Published var goalMinutes: Int { didSet { store.goalMinutes = goalMinutes } }
 
     // Live status
     @Published private(set) var activeReason: BlockReason?
@@ -55,6 +56,7 @@ final class AppModel: ObservableObject {
         maxUnlocksPerDay = store.maxUnlocksPerDay
         unlockWaitSeconds = store.unlockWaitSeconds
         strictMode = store.strictMode
+        goalMinutes = store.goalMinutes
 
         AuthorizationCenter.shared.$authorizationStatus
             .receive(on: DispatchQueue.main)
@@ -120,8 +122,9 @@ final class AppModel: ObservableObject {
         let r = quiz.result
         quizResult = r
         store.quizResult = r
-        // Suggest a limit based on the goal.
-        let suggested = Int(((r.dailyHours - r.goalHoursSaved) * 60 / 2).rounded() / 15) * 15
+        goalMinutes = quiz.goalMinutes
+        // Distracting apps get half of the total goal.
+        let suggested = (quiz.goalMinutes / 2) / 15 * 15
         dailyLimitMinutes = min(240, max(15, suggested))
     }
 

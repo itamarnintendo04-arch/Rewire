@@ -71,8 +71,17 @@ struct OnboardingFlow: View {
         case .name:
             NameView { go(.quiz(0)) }
         case .quiz(let i):
-            QuestionView(question: QuizBank.questions[i]) {
+            let question = QuizBank.questions[i]
+            let next: () -> Void = {
                 if i + 1 < quizCount { go(.quiz(i + 1)) } else { model.finishQuiz(); go(.calculating) }
+            }
+            switch question.kind {
+            case .screenTime:
+                ScreenTimeInputView(question: question, onNext: next)
+            case .goal:
+                GoalInputView(question: question, onNext: next)
+            default:
+                QuestionView(question: question, onNext: next)
             }
         case .calculating:
             CalculatingView { go(.results, remember: false) }

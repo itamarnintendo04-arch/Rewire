@@ -221,10 +221,8 @@ struct DailyLimitEditor: View {
                     }
                 }
 
-                if let r = model.quizResult {
-                    Text("היום את/ה ב-\(formatMinutes(Int(r.dailyHours * 60))) ביום. התחל/י בהדרגה – אפשר להוריד כל שבוע.")
-                        .font(.footnote).foregroundStyle(.white.opacity(0.55))
-                }
+                Text("היעד הכולל שלך: \(formatMinutes(model.goalMinutes)) ביום. מומלץ לתת לאפליקציות המסיחות עד חצי ממנו.")
+                    .font(.footnote).foregroundStyle(.white.opacity(0.55))
             }
         }
     }

@@ -17,7 +17,20 @@ struct SettingsView: View {
                 }
             }
 
-            section("מגבלה יומית") {
+            section("יעד זמן מסך יומי") {
+                Card {
+                    VStack(alignment: .leading, spacing: 10) {
+                        MinutesDial(minutes: $model.goalMinutes, range: 15...600,
+                                    color: AnyShapeStyle(Theme.neon))
+                        if let r = model.quizResult {
+                            Text("התחלת עם \(formatMinutes(r.currentMinutes)) ביום.")
+                                .font(.footnote).foregroundStyle(.white.opacity(0.55))
+                        }
+                    }
+                }
+            }
+
+            section("מגבלה יומית לאפליקציות חסומות") {
                 Card { DailyLimitEditor() }
                     .disabled(model.strictMode && model.activeReason == .limit)
             }

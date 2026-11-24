@@ -134,3 +134,4 @@ targets:
       path: Extensions/Report/RewireReport.entitlements
       properties:
         com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.com.example.rewire]

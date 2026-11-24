@@ -8,6 +8,8 @@
 | פיצ'ר | איפה בקוד |
 |---|---|
 | שאלון פתיחה (10 שאלות) עם ציון Brain Rot | `App/Models/Quiz.swift`, `App/Views/Onboarding/IntroViews.swift` |
+| בשאלון: כמה זמן מסך יש לך היום ומה היעד, עם סליידר ומשוב חי | `App/Views/Onboarding/ScreenTimeInputViews.swift` |
+| התקדמות מול היעד היומי בדוח של היום, ועריכת היעד בהגדרות | `Extensions/Report/ReportViews.swift`, `SettingsView` |
 | מסך "מחשב…", ציון מול ממוצע, תחזית של שנים שהולכות לטלפון | `App/Views/Onboarding/ResultViews.swift` |
 | חיבור לזמן מסך של אפל (`AuthorizationCenter`) | `PermissionView` ב-`SetupViews.swift` |
 | בחירת אפליקציות, קטגוריות ואתרים (`FamilyActivityPicker`) | `SelectAppsView`, `SelectionSummary` |

@@ -39,6 +39,7 @@ final class SharedStore {
         static let quizResult = "quizResult"
         static let blockedOpens = "blockedOpens"
         static let focusMinutesTotal = "focusMinutesTotal"
+        static let goalMinutes = "goalMinutes"
     }
 
     // MARK: - Codable helpers
@@ -83,6 +84,12 @@ final class SharedStore {
     var quizResult: QuizResult? {
         get { decode(Keys.quizResult) }
         set { encode(newValue, Keys.quizResult) }
+    }
+
+    /// Daily screen-time goal (all apps). Key is also read by the Report extension.
+    var goalMinutes: Int {
+        get { let v = defaults.integer(forKey: Keys.goalMinutes); return v == 0 ? 120 : v }
+        set { defaults.set(newValue, forKey: Keys.goalMinutes) }
     }
 
     var installDate: Date {
@@ -262,6 +269,10 @@ struct QuizResult: Codable, Equatable {
     var goalHoursSaved: Double
     var topApps: [String]
     var impacts: [String]
+    /// Target total daily screen time chosen in the questionnaire.
+    var goalMinutes: Int? = nil
+
+    var currentMinutes: Int { Int(dailyHours * 60) }
 
     static let lifeExpectancy = 80.0
 

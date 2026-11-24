@@ -22,8 +22,15 @@ struct QuizQuestion: Identifiable {
     var multiCap: Int = 10
 
     var maxScore: Int {
-        multiSelect ? multiCap : (options.map(\.score).max() ?? 0)
+        switch kind {
+        case .screenTime: return 30
+        case .goal: return 0
+        default: return multiSelect ? multiCap : (options.map(\.score).max() ?? 0)
+        }
     }
+
+    /// Questions answered with a slider instead of options.
+    var isInput: Bool { kind == .screenTime || kind == .goal }
 }
 
 enum QuizBank {
@@ -37,15 +44,9 @@ enum QuizBank {
                         .init(id: "a4", emoji: "🧔", text: "35–44", value: 40),
                         .init(id: "a5", emoji: "🧓", text: "45 ומעלה", value: 50),
                      ]),
-        QuizQuestion(id: "screen", kind: .screenTime, title: "כמה זמן מסך יש לך ביום?",
-                     subtitle: "אפשר לבדוק בהגדרות ← זמן מסך. תהיה/י כנה 🙂",
-                     options: [
-                        .init(id: "s1", emoji: "🙂", text: "פחות משעתיים", score: 4, value: 1.5),
-                        .init(id: "s2", emoji: "😐", text: "2–4 שעות", score: 10, value: 3),
-                        .init(id: "s3", emoji: "😬", text: "4–6 שעות", score: 18, value: 5),
-                        .init(id: "s4", emoji: "😵", text: "6–8 שעות", score: 24, value: 7),
-                        .init(id: "s5", emoji: "💀", text: "יותר מ-8 שעות", score: 30, value: 9),
-                     ]),
+        QuizQuestion(id: "screen", kind: .screenTime, title: "כמה זמן מסך יש לך ביום כרגע?",
+                     subtitle: "לא בטוח/ה? הגדרות ← זמן מסך ← ראה את כל הפעילות",
+                     options: []),
         QuizQuestion(id: "morning", kind: .generic, title: "מה הדבר הראשון שאת/ה עושה כשאת/ה מתעורר/ת?",
                      options: [
                         .init(id: "m1", emoji: "📱", text: "בודק/ת את הטלפון", score: 10),
@@ -100,13 +101,9 @@ enum QuizBank {
                         .init(id: "confidence", emoji: "🪞", text: "ביטחון עצמי", score: 2),
                      ],
                      multiSelect: true, multiCap: 10),
-        QuizQuestion(id: "goal", kind: .goal, title: "כמה זמן היית רוצה להחזיר לעצמך כל יום?",
-                     options: [
-                        .init(id: "g1", emoji: "🌱", text: "חצי שעה", value: 0.5),
-                        .init(id: "g2", emoji: "🌿", text: "שעה", value: 1),
-                        .init(id: "g3", emoji: "🌳", text: "שעתיים", value: 2),
-                        .init(id: "g4", emoji: "🚀", text: "חצי מזמן המסך שלי", value: -1),
-                     ]),
+        QuizQuestion(id: "goal", kind: .goal, title: "מה היעד שלך?",
+                     subtitle: "כמה זמן מסך ביום היית רוצה שיהיה לך?",
+                     options: []),
     ]
 }
 
@@ -114,7 +111,20 @@ enum QuizBank {
 struct QuizState {
     var answers: [String: Set<String>] = [:]
 
-    func isAnswered(_ q: QuizQuestion) -> Bool { !(answers[q.id]?.isEmpty ?? true) }
+    /// Current average daily screen time, in minutes.
+    var currentMinutes: Int = 240 {
+        didSet { if goalMinutes >= currentMinutes { goalMinutes = Self.defaultGoal(for: currentMinutes) } }
+    }
+    /// Target daily screen time, in minutes.
+    var goalMinutes: Int = 120
+
+    static func defaultGoal(for current: Int) -> Int {
+        max(15, (current / 2) / 15 * 15)
+    }
+
+    func isAnswered(_ q: QuizQuestion) -> Bool {
+        q.isInput || !(answers[q.id]?.isEmpty ?? true)
+    }
 
     mutating func toggle(_ option: QuizOption, in q: QuizQuestion) {
         var set = answers[q.id] ?? []
@@ -136,6 +146,10 @@ struct QuizState {
         var total = 0, max = 0
         for q in QuizBank.questions {
             max += q.maxScore
+            if q.kind == .screenTime {
+                total += Swift.min(30, Int(dailyHours / 9 * 30))
+                continue
+            }
             let ids = answers[q.id] ?? []
             let s = q.options.filter { ids.contains($0.id) }.map(\.score).reduce(0, +)
             total += Swift.min(s, q.maxScore)
@@ -144,13 +158,11 @@ struct QuizState {
         return Int((Double(total) / Double(max) * 100).rounded())
     }
 
-    var dailyHours: Double { selected(.screenTime).first?.value ?? 4 }
+    var dailyHours: Double { Double(currentMinutes) / 60 }
     var age: Int { Int(selected(.age).first?.value ?? 25) }
 
-    var goalHours: Double {
-        let v = selected(.goal).first?.value ?? 1
-        return v < 0 ? dailyHours / 2 : min(v, dailyHours)
-    }
+    /// Hours per day the user wants to win back.
+    var goalHours: Double { Double(max(0, currentMinutes - goalMinutes)) / 60 }
 
     var result: QuizResult {
         QuizResult(score: score,
@@ -158,7 +170,8 @@ struct QuizState {
                    age: age,
                    goalHoursSaved: goalHours,
                    topApps: selected(.apps).map(\.text),
-                   impacts: selected(.impacts).map(\.text))
+                   impacts: selected(.impacts).map(\.text),
+                   goalMinutes: goalMinutes)
     }
 }
 

@@ -9,6 +9,12 @@ private let card = Color.white.opacity(0.06)
 struct TodayReportView: View {
     let report: TodayData
 
+    /// Written by the app (SharedStore.goalMinutes) in the shared App Group.
+    private var goalMinutes: Int {
+        let v = UserDefaults(suiteName: "group.com.example.rewire")?.integer(forKey: "goalMinutes") ?? 0
+        return v == 0 ? 120 : v
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
@@ -27,6 +33,8 @@ struct TodayReportView: View {
                         .foregroundStyle(neon)
                 }
             }
+
+            goalProgress
 
             if report.apps.isEmpty {
                 Text("עוד אין נתונים להיום")
@@ -71,6 +79,29 @@ struct TodayReportView: View {
         .background(RoundedRectangle(cornerRadius: 24).fill(card))
         .environment(\.layoutDirection, .rightToLeft)
         .preferredColorScheme(.dark)
+    }
+
+    private var goalProgress: some View {
+        let goal = TimeInterval(goalMinutes * 60)
+        let ratio = goal > 0 ? report.total / goal : 0
+        let over = ratio > 1
+        let color = over ? Color(red: 1, green: 0.32, blue: 0.42) : (ratio > 0.8 ? Color.orange : neon)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("יעד: \(formatDuration(goal))").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Spacer()
+                Text(over ? "חרגת ב-\(formatDuration(report.total - goal))"
+                          : "נשארו \(formatDuration(goal - report.total))")
+                    .font(.caption.weight(.bold)).foregroundStyle(color)
+            }
+            GeometryReader { geo in
+                Capsule().fill(Color.white.opacity(0.08))
+                    .overlay(alignment: .leading) {
+                        Capsule().fill(color).frame(width: geo.size.width * min(1, ratio))
+                    }
+            }
+            .frame(height: 10)
+        }
     }
 }
 

@@ -69,17 +69,41 @@ jobs:
           name: Rewire-ipa
           path: Rewire.ipa
 
+      - name: Read version
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            V=$(grep -m1 'MARKETING_VERSION' project.yml | sed -E 's/.*"(.*)".*/\1/')
+            echo "tag=v$V" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Rewire ${{ steps.ver.outputs.tag }}
+          make_latest: true
+          overwrite_files: true
           files: Rewire.ipa
-          generate_release_notes: true
           body: |
-            ## Rewire ${{ github.ref_name }}
+            ## Rewire ${{ steps.ver.outputs.tag }}
 
-            Unsigned iOS build (`Rewire.ipa`). Install it by re-signing with your own Apple ID / developer
-            certificate – e.g. Sideloadly, AltStore or Xcode. See the README for details.
+            Built from commit ${{ github.sha }}.
 
-            Screen Time blocking needs the **Family Controls** capability on your Apple Developer account
-            and a real iPhone running iOS 16+.
+            **Install:** `Rewire.ipa` is an unsigned iOS build with its entitlements embedded.
+            Re-sign it with your own Apple ID or developer certificate, for example with
+            Sideloadly, AltStore or Xcode.
+
+            **Requirements:** a real iPhone running iOS 16 or later. Screen Time blocking needs the
+            **Family Controls** capability on the signing account.
+
+            ### What's inside
+            - Onboarding: name, exact age, quiz, current screen time and goal, Brain Rot score, life projection
+            - Apple Screen Time connection and an app, category and website picker
+            - Daily limit, scheduled block times, focus sessions
+            - Custom block screen, an unlock flow with friction, strict mode
+            - Screen time reports, goal progress, weekly chart, streaks
